@@ -1,0 +1,39 @@
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from keras.datasets import cifar10
+from keras.utils import to_categorical
+
+# ინიციალიზაცია
+model = Sequential()
+
+# კონვოლუციური ფენა
+model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))  # input_shape should be (32, 32, 3) for CIFAR-10
+model.add(MaxPooling2D((2, 2)))
+
+# მეორე კონვოლუციური ფენა
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(MaxPooling2D((2, 2)))
+
+# სრულად დაკავშირებული ფენები
+model.add(Flatten())
+model.add(Dense(128, activation='relu'))
+model.add(Dense(10, activation='softmax'))
+
+# კომპილაცია
+model.compile(optimizer='adam',
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+
+# მონაცემების ჩატვირთვა და ტრენინგი
+(x_train, y_train), (x_test, y_test) = cifar10.load_data()
+
+# მონაცემების ნორმალიზაცია და ტრენინგის მზადება
+x_train = x_train.astype('float32') / 255
+x_test = x_test.astype('float32') / 255
+
+# ლეიბელების გადაყვანა კატეგორიულ ფორმატში
+y_train = to_categorical(y_train, 10)
+y_test = to_categorical(y_test, 10)
+
+# მოდელის ტრენინგი
+model.fit(x_train, y_train, epochs=10, batch_size=32, validation_data=(x_test, y_test))
